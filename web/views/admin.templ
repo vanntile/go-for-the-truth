@@ -1,0 +1,71 @@
+package views
+
+import (
+	"fmt"
+
+	"github.com/vanntile/go-for-the-truth/web/models"
+)
+
+func getRowStyling(question models.Question) string {
+	if question.Claims == models.Group2 {
+		return "ring-slate-700 bg-slate-50 ring-2 ring-inset"
+	}
+
+	return "ring-green-700 bg-green-100 ring-2 ring-inset"
+}
+
+templ AdminPage(questions []models.Question) {
+	<div class="my-14 mx-4 w-full prose prose-slate lg:prose-lg max-w-prose">
+		<div class="my-4">
+			<p>
+				Uploading questions will remove all existing questions. If you just want to add new questions, first
+				download the existing questions and append new ones in the proper format. Or let a professional do it ;)
+			</p>
+			<div>
+				@Btn("downloadQuestions", "Download questions")
+				<div class="overflow-hidden relative inline-flex mx-2 w-50 rounded-lg text-gray-200 bg-gray-900 hover:bg-gray-700 active:scale-x-105">
+					<div class="grow  px-6 py-3 font-bold outline-none transition-transform">
+						Upload questions
+					</div>
+					<input
+						type="file"
+						id="uploadQuestions"
+						name="file"
+						class="h-full w-full opacity-0 absolute block pin-r pin-t cursor-pointer select-none"
+					/>
+				</div>
+				@Btn("downloadAnswers", "Download answers")
+			</div>
+		</div>
+		<h1>Existing questions</h1>
+		<table class="table-auto border-separate border-spacing-x-0 border-spacing-y-1.5">
+			<thead>
+				<tr class="bg-slate-300">
+					<th class="px-4 py-2 not-prose text-start">ID</th>
+					<th class="px-4 py-2 not-prose text-start">Claims</th>
+					<th class="px-4 py-2 not-prose text-start">Fake</th>
+					<th class="px-4 py-2 not-prose text-start">Question</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, question := range questions {
+					<tr class={ getRowStyling(question) }>
+						<td class="px-4 py-2 not-prose">{ fmt.Sprintf("%d", question.ID) }</td>
+						if question.Claims == models.Group2 {
+							<td class="px-4 py-2 not-prose">{ models.Group2 }</td>
+						} else {
+							<td class="px-4 py-2 not-prose">{ models.Group1 }</td>
+						}
+						if question.Fake {
+							<td class="px-4 py-2 not-prose">fake</td>
+						} else {
+							<td class="px-4 py-2 not-prose">real</td>
+						}
+						<td class="px-4 py-2 not-prose">{ question.Question }</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		<script src="/admin.js"></script>
+	</div>
+}

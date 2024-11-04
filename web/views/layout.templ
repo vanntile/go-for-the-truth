@@ -1,0 +1,42 @@
+package views
+
+templ BaseLayout(content templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+			<meta name="viewport" content="width=device-width"/>
+			<meta name="robots" content="index, follow"/>
+			<meta name="author" content="vanntile"/>
+			<meta
+				name="description"
+				content="Can you tell real and fake iOS and Android fans apart?"
+			/>
+			<meta name="keywords" content="quiz, biases"/>
+			<meta property="date" content="2024-11-06T08:00:00Z"/>
+			<title>Go for the truth</title>
+			<link rel="stylesheet" type="text/css" href="/styles.css"/>
+		</head>
+		<body class="bg-slate-200 ease-in-out flex items-center justify-center min-h-screen">
+			@content
+			<div id="error" class="hidden absolute top-0 left-0 right-0 z-50 flex items-center justify-center py-2 px-4">
+				<div class="px-4 py-2 min-w-56 bg-red-600 text-center text-sm font-medium text-white rounded-md shadow-lg">Error</div>
+			</div>
+		</body>
+	</html>
+}
+
+templ ErrorPage(message string) {
+	<div class="prose prose-slate mx-4 max-w-none lg:prose-lg md:mx-0">
+		<div class="flex min-h-screen items-center justify-center">
+			<div class="my-14 flex w-full max-w-prose flex-col gap-4">
+				<h1>Whoops! We experienced some kind of failure</h1>
+				<p>We are sorry about this! We'll be working extra hard to fix it soon tho!</p>
+				if len(message) > 0 {
+					<p>Error: { message }</p>
+				}
+			</div>
+		</div>
+	</div>
+}

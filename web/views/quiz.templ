@@ -1,0 +1,244 @@
+package views
+
+import (
+	"fmt"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	"github.com/vanntile/go-for-the-truth/web/models"
+)
+
+const INPUT_CLASS = "block w-full rounded-lg border-2 border-gray-900 bg-gray-50 px-6 py-3 font-bold leading-none" +
+	"text-gray-900 outline-none focus:border-green-700 focus:bg-green-50 focus:ring-4 focus:ring-green-700"
+
+templ Btn(id, title string) {
+	<button
+		id={ id }
+		type="button"
+		class={
+			"grow cursor-pointer select-none rounded-lg bg-gray-900 px-6 py-3 font-bold text-gray-200",
+			"outline-none transition-transform hover:bg-gray-700",
+			"focus:bg-green-950 focus:ring-4 focus:ring-green-700 active:scale-x-105",
+		}
+	>{ title }</button>
+}
+
+templ Introduction(questionCount int) {
+	<div id="pageIntro" class="flex min-h-screen items-center justify-center py-16">
+		<div class="w-full max-w-prose">
+			<h1>Go for the truth</h1>
+			<p>
+				Can you tell the difference between real and fake
+				<span class="border-b-4 border-green-700">{ models.Group1 }</span> and
+				<span class="border-b-4 border-slate-700">{ models.Group2 }</span> users?
+			</p>
+			<p>
+				You’re about to see { fmt.Sprintf("%d", questionCount) } statements that people wrote based one of two
+				prompts: 
+				<span class="italic">
+					“I’m an <span class="border-b-4 border-green-700">{ models.Group1 } user</span> because…”
+				</span> or
+				<span class="italic">
+					“I’m an <span class="border-b-4 border-slate-700">{ models.Group2 } user</span> because…”
+				</span>.
+			</p>
+			<p>
+				That means some of these statements are <span class="font-bold uppercase">real</span> — the person is
+				explaining why they belong to their actual group of mobile users. Some of these statements are
+				<span class="font-bold uppercase">fake</span> — the person is pretending to belong to the opposite
+				group.
+			</p>
+			<p>
+				<span class="font-bold uppercase">real</span> statements: { models.Group2 } users claiming to be
+				{ models.Group2 } users, or { models.Group1 } users claiming to be { models.Group1 } users.
+			</p>
+			<p>
+				<span class="font-bold uppercase">fake</span> statements: { models.Group2 } users claiming to be
+				{ models.Group1 } users, or { models.Group1 } users claiming to be { models.Group2 } users.
+			</p>
+			<p>
+				Your job is to judge whether each statement is <span class="font-bold uppercase">real</span> or
+				<span class="font-bold uppercase">fake</span>.
+			</p>
+			@Btn("nextIntro", "Click to begin")
+		</div>
+	</div>
+}
+
+templ Outro(countries []string) {
+	<div id="pageOutro" class="hidden min-h-screen items-center justify-center">
+		<div class="flex w-full max-w-prose flex-col gap-4 pt-8 md:pt-12 pb-16">
+			<p class="!my-0">
+				Before we show you your results, we have a few more questions for you that are for
+				informational purposes only.
+			</p>
+			<div>
+				<label for="countryUS" class="mb-2 block font-medium text-gray-800">
+					Do you live in the United States? *
+				</label>
+				<select
+					name="is-country-us"
+					id="countryUS"
+					class={ INPUT_CLASS }
+				>
+					<option disabled selected>Select an option</option>
+					<option value="yes">Yes</option>
+					<option value="no">No</option>
+				</select>
+			</div>
+			<div id="formCountry" class="hidden">
+				<label for="countrySelect" class="mb-2 block font-medium text-gray-800">
+					In which country do you live? *
+				</label>
+				<select
+					name="countries"
+					id="countrySelect"
+					class={ INPUT_CLASS }
+				>
+					<option disabled selected>Select an option</option>
+					for _, country := range countries {
+						<option value={ country }>{ country }</option>
+					}
+				</select>
+			</div>
+			<div>
+				<label for="side" class="mb-2 block font-medium text-gray-800">
+					If you had to choose one side to
+					identify with, which would you choose? *
+				</label>
+				<select
+					name="side"
+					id="sideSelect"
+					class={ INPUT_CLASS }
+				>
+					<option disabled selected>Select an option</option>
+					<option value={ models.Group1 }>{ models.Group1 }</option>
+					<option value={ models.Group2 }>{ models.Group2 }</option>
+				</select>
+			</div>
+			<div>
+				<label for="age" class="mb-2 block font-medium text-gray-800">What is your age? *</label>
+				<input
+					type="number"
+					name="age"
+					id="age"
+					required
+					min="18"
+					max="120"
+					class={
+						INPUT_CLASS, "peer out-of-range:border-red-700 out-of-range:text-red-700 ",
+						"out-of-range:ring-red-700 focus:invalid:border-red-700 focus:invalid:ring-red-700",
+						"focus-visible:border-green-700 focus-visible:bg-green-50 focus-visible:ring-green-700",
+					}
+				/>
+				<div class="invisible peer-invalid:visible">Please provide a valid age.</div>
+			</div>
+			<p class="!my-0">
+				{ "By submitting, you agree to the processing of the data above for further research means. See our " }
+				<a href="/privacypolicy.html" target="_blank">Privacy Policy</a> { "for more info" }
+			</p>
+			@Btn("nextOutro", "Send answers and see your results")
+			<div id="resultsLoading" class="hidden font-bold">Sending answers...</div>
+		</div>
+	</div>
+}
+
+templ Questions(questions []models.Question) {
+	for idx, question := range questions {
+		<div
+			id={ fmt.Sprintf("page%d", idx) }
+			data-id={ fmt.Sprintf("%d", question.ID) }
+			class="hidden min-h-screen scroll-m-0 items-center justify-center pt-8 md:pt-12 pb-16"
+		>
+			<div class="w-full max-w-prose">
+				<p class="font-medium">
+					{ "The following statement was written based on the prompt: " }
+					<span class="text-nowrap">
+						{ "“I’m a " }
+						<span class="uppercase">
+							{ cases.Title(language.English, cases.Compact).String(question.Claims) }
+						</span>
+						{ " because…”" }
+					</span>
+				</p>
+				<p>{ question.Question } </p>
+				<div class="flex gap-8">
+					@Btn(fmt.Sprintf("fake%d", idx), "Fake")
+					@Btn(fmt.Sprintf("real%d", idx), "Real")
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ Answers(answersCorrect int, replies []models.Reply) {
+	<div class="flex min-h-screen items-center justify-center pb-16">
+		<div class="flex w-full max-w-prose flex-col gap-4">
+			<h2>
+				You got { fmt.Sprintf("%d/%d", answersCorrect, len(replies)) } answers right.
+			</h2>
+			for _, reply := range replies {
+				<div
+					class={
+						"rounded-lg border-4 px-4 pt-6 -mx-3",
+						templ.KV("border-green-700 bg-green-50", reply.Fake == reply.AnsweredFake),
+						templ.KV("border-red-700 bg-red-50", reply.Fake != reply.AnsweredFake),
+					}
+				>
+					<div class="font-medium py-4">
+						{ "The following statement was written based on the prompt: " }
+						<span class="text-nowrap">
+							{ "“I’m a " }
+							<span class="uppercase">
+								{ cases.Title(language.English, cases.Compact).String(reply.Claims) }
+							</span>
+							{ " because…”" }
+						</span>
+					</div>
+					<div>{ reply.Question }</div>
+					<div class="py-6">
+						{ "Your answer: " }
+						if reply.AnsweredFake {
+							<span class="font-bold uppercase">fake</span>
+						} else {
+							<span class="font-bold uppercase">real</span>
+						}
+						{ ". Right answer: " }
+						if reply.Fake {
+							<span class="font-bold uppercase">fake</span>
+						} else {
+							<span class="font-bold uppercase">real</span>
+						}
+					</div>
+				</div>
+			}
+			<p>
+				Thank you for participating!
+			</p>
+			@Btn("nextResults", "Want to try again?")
+			<p class="py-8">
+				Built by <a target="_blank" href="https://vanntile.com">{ "@vanntile" }</a>, 2024.
+			</p>
+		</div>
+	</div>
+}
+
+templ QuizPage(seed string, hasAnswers bool, questions []models.Question, answersCorrect int, answers []models.Reply) {
+	<div
+		id="quiz"
+		data-seed={ seed }
+		data-count={ fmt.Sprintf("%d", len(questions)) }
+		data-answers?={ hasAnswers }
+		class="prose prose-slate mx-4 max-w-none lg:prose-lg md:mx-0"
+	>
+		if hasAnswers {
+			@Answers(answersCorrect, answers)
+		} else {
+			@Introduction(len(questions))
+			@Questions(questions)
+			@Outro(models.COUNTRIES)
+		}
+		<script src="/quiz.js"></script>
+	</div>
+}
